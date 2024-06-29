@@ -13,7 +13,10 @@ def webhook():
     # Store incoming json data from webhook
     payload = request.get_json()
     user = "KaushalBisht1986"
-    cred = os.environ["GH_TOKEN"]
+    # the password in prod env should come from parameter store
+    cred = "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"
+    
+    print(payload)
     if payload is None:
         print("POST was not formatted in JSON")
 
@@ -22,7 +25,7 @@ def webhook():
         if payload["action"] == "created":
             # Delay needed for server to be create the page, otherwise a 404 returns
             time.sleep(1)
-            # Create branch protection for the master branch of the repo
+            # Create branch protection for the main branch of the repo
             branch_protection = {
                 "required_status_checks": {"strict": True, "contexts": ["default"]},
                 "enforce_admins": False,
@@ -31,8 +34,9 @@ def webhook():
             }
             session = requests.session()
             session.auth = (user, cred)
+            print(json.dumps(branch_protection))
             response_1 = session.put(
-                payload["repository"]["url"] + "/branches/master/protection",
+                payload["repository"]["url"] + "/branches/main/protection",
                 json.dumps(branch_protection),
             )
             if response_1.status_code == 200:
@@ -48,7 +52,7 @@ def webhook():
                             "title": "New Protection Added",
                             "body": "@"
                             + user
-                            + " A new branch protection was added to the master branch.",
+                            + " A new branch protection was added to the main branch.",
                         }
                         session = requests.session()
                         session.auth = (user, cred)
